@@ -1,4 +1,4 @@
-# MTB Variant analysis
+# Directed Evolution Variant Analysis
 
 This repository contains various scripts for analysing genomic variants of a directed evolution study.
 
