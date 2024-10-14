@@ -1,6 +1,6 @@
 # MTB Variant analysis
 
-This repository contains various scripts for analysing genomic variants.
+This repository contains various scripts for analysing genomic variants of a directed evolution study.
 
 ## Installation ## 
 Create the conda environment:  `conda create -f environment.yml`.
@@ -23,7 +23,7 @@ trimmomatic PE \
     ILLUMINACLIP:NexteraPE-PE.fa:2:40:15
 ```
 
-**Variant analysis with samtools and bcftools**
+**Variant analysis with samtools and bcftools**\
 Reference genome: GenBank CP110619.1
 ```
 bwa index reference_seq
@@ -37,8 +37,8 @@ vcfutils.pl varFilter sample_variants.vcf > sample_final_variants.vcf
 less -S sample_final_variants.vcf
 ```
 
-**Consensus sequence**
-Done for parental strain used in directed evolution and used in variant analysis of evolved strains
+**Generate consensus sequences**\
+Done for parental strain used in directed evolution and used in variant analysis of evolved strains\
 Also done for samples but not used in variant analysis
 ```
 samtools consensus -f fasta aligned_sorted_seq.bam -o parental.fasta
@@ -56,8 +56,8 @@ download bam bai and vcf files
 annotated download fasta and gff files
 ```
 
-**SNIPPY**
-did not use any made consensus genomes
+**SNIPPY**\
+Do not use consensus genomes from previous step
 ```
 snippy --outdir sample_snps --ref reference_seq --R1 file1.trim.fq --R2 file2.trim.fq
 ```
