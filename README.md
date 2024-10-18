@@ -61,3 +61,16 @@ Do not use consensus genomes from previous step
 ```
 snippy --outdir sample_snps --ref reference_seq --R1 file1.trim.fq --R2 file2.trim.fq
 ```
+
+# Phenotypic follow-up
+
+Additional R scripts utilised to analyse growth curve data.
+
+## Scripts ##
+**Growth_Curve_Analysis_Script**
+```
+R script to analyse growth curve data including area under curve (AUC) analysis. \
+data: 20240913_RIF_fabF.xlsx
+      Plate_Layout.xlsx
+      20241017_fabF_biolog.xlsx
+```
