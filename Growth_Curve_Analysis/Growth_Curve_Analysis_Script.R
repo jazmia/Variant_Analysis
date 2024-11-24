@@ -356,7 +356,7 @@ plot <- ggplot(stat_sample_data,
                 width = 0.2) +
   labs(title = paste0("*E. coli* K12 WT vs *E. coli* K12 Δ*fabF*"),
        x = "Antibiotic Conc. (µg/mL)", 
-       y = "Mean AOU",
+       y = "Mean AUC",
        color = "Strain") +
   theme(axis.text.x = element_text(size = 20),
         axis.text.y = element_text(size = 20),
