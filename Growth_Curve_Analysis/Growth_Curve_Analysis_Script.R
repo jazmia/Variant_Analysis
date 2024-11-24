@@ -1,4 +1,4 @@
-#RIF MIC GC Analysis
+#RIF fabF Growth Dynamics
 
 # NOTES - normalised to min value
 
@@ -9,10 +9,13 @@ library(ggplot2)
 library(readxl)
 library(growthcurver)
 library(openxlsx)
-library(ggpubr)
 library(stringr)
 library(ggtext)
+library(rstatix)
+library(ggpubr)
+library(svglite)
 
+#### RIF MIC GC Analysis ####
 #### Formating Data ####
 
 # Loading Data
@@ -137,79 +140,17 @@ plot <- ggplot(stat_fabF_data,
       legend.position = "bottom",
       legend.direction = "horizontal",
       legend.box = "horizontal",
-      title = ggtext::element_markdown())
+      title = ggtext::element_markdown()) +
+  scale_fill_manual(values = c("WT" = "#00BFC4", "ΔfabF" = "#7CAE00")) +
+  scale_color_manual(values = c("WT" = "#00BFC4", "ΔfabF" = "#7CAE00"))
 
 print(plot)
 
 ggsave(filename = paste0("./graphs/240913_RIF_fabF_MIC_growth_curves.jpg"), 
        plot = plot, width = 297, height=210, units = 'mm')
 
-## Only end-point values
-time_18_fabF <- normalised_fabF_data %>% filter(Hour == 18)
-
-stat_time_18_fabF <- time_18_fabF %>%
-  group_by(Sample, `Antibiotic Concentration`) %>%
-  summarise(
-    mean = mean(normalised_value),
-    sd = sd(normalised_value),
-    n = n(),
-    se = sd / sqrt(n))
-head(stat_time_18_fabF)
-
-stat_time_18_fabF <- stat_time_18_fabF %>% rename(Strain = Sample) %>% 
-  filter(!`Antibiotic Concentration` %in% c("Sterility Control", "60", "40", "30",
-                                         "20", "3.75"))
-  
-stat_time_18_fabF$`Antibiotic Concentration` <- 
-  as.numeric(as.character(stat_time_18_fabF$`Antibiotic Concentration`))
-
-
-
-plot <- ggplot(stat_time_18_fabF, 
-               aes(x = `Antibiotic Concentration`, 
-                   y = mean, colour = Strain, fill = Strain)) +
-  geom_line() +
-  geom_pointrange(aes(ymin = mean - se, 
-                  ymax = mean + se), 
-              alpha = 0.4) +
-  labs(title = paste0("*E. coli* K12 WT vs *E. coli* K12 Δ*fabF*"),
-       x = "Antibiotic Conc. (µg/mL)", 
-       y = "Mean AOU",
-       color = "Strain") +
-  theme(axis.text.x = element_text(size = 20),
-        axis.text.y = element_text(size = 20),
-        axis.title.x = element_text(size = 32),
-        axis.title.y = element_text(size = 32),
-        plot.title = element_text(face = "bold", hjust = 0.5, size = 38),
-        strip.text = element_text(size = 26),  # Text size for facet labels
-        legend.text = element_text(size = 26),
-        legend.title = element_text(size = 32),
-        axis.line = element_line(color = "black"),  
-        panel.border = element_blank(), 
-        legend.position = "bottom",
-        legend.direction = "horizontal",
-        legend.box = "horizontal",
-        title = ggtext::element_markdown())
-
-print(plot)
-
-ggsave(filename = paste0("./graphs/240913_RIF_fabF_MIC_growth_curves_short_endpoint.jpg"), 
-       plot = plot, width = 297, height=210, units = 'mm')
-
 
 #### AUC Analysis ####
-
-#Load packages 
-library(tidyverse)
-library(reshape2)
-library(ggplot2)
-library(readxl)
-library(growthcurver)
-library(openxlsx)
-library(stringr)
-library(ggtext)
-library(rstatix)
-library(ggpubr)
 
 #### Loading the Data ####
 
@@ -368,20 +309,22 @@ p = ggplot(sample_data, aes(x = Sample, y = auc_l)) +
        x = "Sample", 
        y = "AUC",
        caption = "Statistics: t-test") +
-  theme(axis.text.x = element_text(angle = 50, hjust = 1, size = 16),
-        plot.title = element_text(face = "bold", hjust = 0.5, size = 32),
-        axis.title.x = element_text(size = 28),  # Increase x-axis title size
-        axis.title.y = element_text(size = 28),  # Increase y-axis title size
-        axis.text.y = element_text(size = 20),  # Increase y-axis text size
-        legend.title = element_text(size = 24),  # Larger legend title
-        legend.text = element_text(size = 24),
-        strip.text = element_text(size = 22),
+  theme(axis.text.x = element_text(angle = 50, hjust = 1, size = 10),
+        axis.text.y = element_text(size = 20),
+        axis.title.x = element_text(size = 32),
+        axis.title.y = element_text(size = 32),
+        plot.title = element_text(face = "bold", hjust = 0.5, size = 38),
+        strip.text = element_text(size = 26),  # Text size for facet labels
+        legend.text = element_text(size = 26),
+        legend.title = element_text(size = 32),
         plot.caption = element_text(size = 20),
+        axis.line = element_line(color = "black"),  
+        panel.border = element_blank(), 
         legend.position = "bottom",
         legend.direction = "horizontal",
         legend.box = "horizontal",
         title = ggtext::element_markdown()) +
-  scale_fill_manual(values = c("WT" = "#e41a1c", "ΔfabF" = "#377eb8")) +
+  scale_fill_manual(values = c("WT" = "#00BFC4", "ΔfabF" = "#7CAE00")) +
   stat_pvalue_manual(t_test, 
                      label = "p.signif", 
                      tip.length = 0.03, size = 6, hide.ns = TRUE)
@@ -389,6 +332,52 @@ p = ggplot(sample_data, aes(x = Sample, y = auc_l)) +
 print(p)
     
 ggsave(gsub("%","_", paste0("./stat_graphs/RIF.jpg")), width = 297, height = 210, units = "mm")
+
+stat_sample_data <- sample_data %>%
+  group_by(Sample, `Antibiotic Concentration`) %>%
+  summarise(
+    mean = mean(auc_l),
+    sd = sd(auc_l),
+    n = n(),
+    se = sd / sqrt(n))
+head(stat_sample_data)
+
+stat_sample_data <- stat_sample_data %>% rename(Strain = Sample)
+head(stat_sample_data)
+
+plot <- ggplot(stat_sample_data, 
+               aes(x = `Antibiotic Concentration`, 
+                   y = mean, colour = Strain, fill = Strain, group = Strain)) +
+  geom_line() +
+  geom_point() +
+  geom_errorbar(aes(ymin = mean - se, 
+                      ymax = mean + se), 
+                  alpha = 0.7,
+                width = 0.2) +
+  labs(title = paste0("*E. coli* K12 WT vs *E. coli* K12 Δ*fabF*"),
+       x = "Antibiotic Conc. (µg/mL)", 
+       y = "Mean AOU",
+       color = "Strain") +
+  theme(axis.text.x = element_text(size = 20),
+        axis.text.y = element_text(size = 20),
+        axis.title.x = element_text(size = 32),
+        axis.title.y = element_text(size = 32),
+        plot.title = element_text(face = "bold", hjust = 0.5, size = 38),
+        legend.text = element_text(size = 26),
+        legend.title = element_text(size = 32),
+        axis.line = element_line(color = "black"),  
+        panel.border = element_blank(), 
+        legend.position = "bottom",
+        legend.direction = "horizontal",
+        legend.box = "horizontal",
+        title = ggtext::element_markdown()) +
+  scale_fill_manual(values = c("WT" = "#00BFC4", "ΔfabF" = "#7CAE00")) +
+  scale_color_manual(values = c("WT" = "#00BFC4", "ΔfabF" = "#7CAE00"))
+
+print(plot)
+
+ggsave(filename = paste0("./graphs/240913_RIF_fabF_MIC_growth_curves_AUC.svg"), 
+       plot = plot, width = 297, height=210, units = 'mm')
 
 #### Difference ####
 mean_data <- sample_data %>%
@@ -450,3 +439,146 @@ p = ggplot(difference_data, aes(x = factor(`Antibiotic Concentration`), y = Diff
 print(p)
 
 ggsave("./difference_graphs/RIF.jpg", width = 297, height = 210, units = "mm")
+
+#### Growth and Respiration Curves ####
+#### Formating Data ####
+
+# Loading Data
+
+data <- read_excel("20241017_fabF_biolog.xlsx", sheet = "Data")
+
+layout <- read_excel("20241017_fabF_biolog.xlsx", sheet = "Layout")
+
+# Reformatting tables
+
+long_data <- reshape2::melt(data, id.vars = "Hour")
+long_data <- long_data %>% rename(Well = variable)
+
+# Merging data and layout
+
+Compiled_data <- merge(long_data, layout, by = c("Well"))
+
+#### Overview ####
+
+Compiled_data <- Compiled_data %>% 
+  filter(`Antibiotic Concentration` != "Empty")
+
+Compiled_data$`Antibiotic Concentration` <- factor(Compiled_data$`Antibiotic Concentration`,
+                                                   levels = c("Sterility Control", "0", "5", "10","20"))
+
+# View graph of each well
+
+sample_data <- Compiled_data 
+
+p = ggplot(sample_data, aes(x = Hour, y = value, color = Well)) +
+  geom_line() +
+  facet_grid(Sample ~ `Antibiotic Concentration`) +
+  labs(y = "Strain", x = "Time")
+
+print(p)
+
+ggsave(gsub("%","_", paste0("./overview/sample_overview.jpg")), width = 297, height = 210, units = "mm")
+
+sample_data <- Compiled_data %>%
+  filter(`Fitness Measure`== "Growth")
+
+p = ggplot(sample_data, aes(x = Hour, y = value, color = Well)) +
+  geom_line() +
+  facet_grid(Sample ~ `Antibiotic Concentration`) +
+  labs(y = "Strain", x = "Time")
+
+print(p)
+
+ggsave(gsub("%","_", paste0("./overview/growth_overview.jpg")), width = 297, height = 210, units = "mm")
+sample_data <- Compiled_data %>%
+  filter(`Fitness Measure`== "Respiration")
+
+p = ggplot(sample_data, aes(x = Hour, y = value, color = Well)) +
+  geom_line() +
+  facet_grid(Sample ~ `Antibiotic Concentration`) +
+  labs(y = "Strain", x = "Time")
+
+print(p)
+
+ggsave(gsub("%","_", paste0("./overview/respiration_overview.jpg")), width = 297, height = 210, units = "mm")
+
+## Filter out ##
+
+filtered_data <- Compiled_data %>%
+  filter(!(Well %in% c("A01", "C03", "D04", "C05")))
+
+#### Normalisation ####
+min_values <- filtered_data %>%
+  group_by(Well, Sample, `Antibiotic Concentration`) %>%
+  summarise(min_value = min(value)) %>%
+  ungroup()
+
+# Merge the minimum values back into the original data
+normalised_data <- merge(filtered_data, min_values, 
+                         by = c("Well", "Sample", "Antibiotic Concentration"))
+
+# Normalize the value column by subtracting the minimum value
+normalised_data$normalised_value <- normalised_data$value - normalised_data$min_value
+
+# Remove the min_value column if it's no longer needed
+normalised_data$min_value <- NULL
+
+# Update fabF_data with the normalized data
+data <- normalised_data %>%
+  filter(Sample != "Blank")
+
+#### Calculate  statistics ####
+
+stat_data <- data %>%
+  filter(`Antibiotic Concentration`!= "Sterility Control") %>%
+  group_by(Hour, Sample, `Antibiotic Concentration`, `Fitness Measure`) %>%
+  summarise(
+    mean = mean(normalised_value),
+    sd = sd(normalised_value),
+    n = n(),
+    se = sd / sqrt(n))
+head(stat_data)
+
+stat_data <- stat_data %>% rename(Strain = Sample)
+head(stat_data)
+
+#### Graphing Growth Curves ####
+
+stat_data <- stat_data %>%
+  mutate(Strain = case_when(
+    Strain == "E. coli K12" ~ "WT",
+    Strain == "E. coli K12 ΔfabF" ~ "ΔfabF",
+    TRUE ~ Strain  # Keep the original value if it doesn't match any of the above
+  ))
+
+plot <- ggplot(stat_data, 
+               aes(x = Hour, 
+                   y = mean, 
+                   color = `Antibiotic Concentration`,
+                   fill = `Antibiotic Concentration`)) +
+  geom_line() +
+  facet_grid(`Fitness Measure`~ Strain, scales = "free_y") +
+  geom_ribbon(aes(ymin = mean - se, 
+                  ymax = mean + se), 
+              alpha = 0.4, colour = NA) +
+  labs(title = paste0("*E. coli* K12 WT vs *E. coli* K12 Δ*fabF*"),
+       x = "Time (h)", 
+       y = "Mean AOU",
+       color = "Antibiotic Concentration") +
+  theme(axis.text.x = element_text(size = 12),
+        plot.title = element_text(face = "bold", hjust = 0.5, size = 22),
+        axis.title.x = element_text(size = 22),  # Increase x-axis title size
+        axis.title.y = element_text(size = 22),  # Increase y-axis title size
+        axis.text.y = element_text(size = 20),  # Increase y-axis text size
+        legend.title = element_text(size = 18),  # Larger legend title
+        legend.text = element_text(size = 20),
+        strip.text = element_text(size = 20),
+        legend.position = "bottom",
+        legend.direction = "horizontal",
+        legend.box = "horizontal",
+        title = ggtext::element_markdown())
+
+print(plot)
+
+ggsave(filename = paste0("./fabF_growth_respiration.jpg"), 
+       plot = plot, width = 297, height=210, units = 'mm')
