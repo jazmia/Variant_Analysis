@@ -64,13 +64,18 @@ snippy --outdir sample_snps --ref reference_seq --R1 file1.trim.fq --R2 file2.tr
 
 # Phenotypic follow-up
 
-Additional R scripts utilised to analyse growth curve data.
+Additional R scripts utilised to analyse growth curve data and flow cytometry data.
 
 ## Scripts ##
 **Growth_Curve_Analysis_Script**
 ```
 R script to analyse growth curve data including area under curve (AUC) analysis. 
-data: 20240913_RIF_fabF.xlsx
-      Plate_Layout.xlsx
-      20241017_fabF_biolog.xlsx
+data: 250326_fabF_RIF_data.xlsx
+      250326_Plate_Layout.xlsx
+```
+
+**Flow_Cytometry_Analysis_Script**
+```
+R script to analyse flow cytometry data including median fluorescence intensity difference (FID) analysis. 
+data: 
 ```
