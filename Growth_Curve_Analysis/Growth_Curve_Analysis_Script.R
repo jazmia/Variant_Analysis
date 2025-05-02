@@ -24,7 +24,7 @@ library(rstatix)
 
 # Loading Data
 
-fabF_Data <- read_excel("250326_fabF_RIF_data.xlsx", sheet = "240913_R1")
+fabF_Data <- read_excel("fabF_RIF_data.xlsx", sheet = "R1")
 
 
 # Reformatting tables
@@ -34,7 +34,7 @@ long_fabF_Data <- reshape2::melt(fabF_Data, id.vars = "Hour")
 long_fabF_Data <- long_fabF_Data %>% rename(Well = variable)
 
 
-RIF_Layout <- read_excel("250326_Plate_Layout.xlsx", sheet = "fabF")
+RIF_Layout <- read_excel("Plate_Layout.xlsx", sheet = "fabF")
 
 
 fabF_Compiled_Data <- merge(long_fabF_Data, RIF_Layout, by = c("Well"))
@@ -53,7 +53,7 @@ p = ggplot(fabF_Compiled_Data, aes(x = Hour, y = value, color = Well)) +
 
 print(p)
 
-ggsave("./graphs/240913_fabF_overview.jpg", width = 297, 
+ggsave("./graphs/R1_fabF_overview.jpg", width = 297, 
        height = 210, units = "mm")
 
 # Remove antibiotic blank, C03, D02
@@ -93,7 +93,7 @@ p = ggplot(fabF_data, aes(x = Hour, y = normalised_value, color = Well)) +
 
 print(p)
 
-ggsave("./graphs/240913_fabF_cleaned_overview.jpg", width = 297, 
+ggsave("./graphs/R1_fabF_cleaned_overview.jpg", width = 297, 
        height = 210, units = "mm")
 
 
@@ -145,7 +145,7 @@ plot <- ggplot(stat_fabF_data,
 
 print(plot)
 
-ggsave(filename = paste0("./graphs/240913_RIF_fabF_MIC_growth_curves.jpg"), 
+ggsave(filename = paste0("./graphs/R1_RIF_fabF_MIC_growth_curves.jpg"), 
        plot = plot, width = 297, height=210, units = 'mm')
 
 
@@ -153,7 +153,7 @@ ggsave(filename = paste0("./graphs/240913_RIF_fabF_MIC_growth_curves.jpg"),
 
 #### Loading the Data ####
 
-fabF_Data <- read_excel("250326_fabF_RIF_data.xlsx", sheet = "240913_R1")
+fabF_Data <- read_excel("fabF_RIF_data.xlsx", sheet = "R1")
 
 ## Rename Hour column to Time
 
@@ -167,7 +167,7 @@ summ_fabF_Data <- SummarizeGrowthByPlate(fabF_Data, bg_correct = "min") %>%
 
 # Loading Plate Layout
 
-fabF_Layout <- read_excel("250326_Plate_Layout.xlsx", sheet = "fabF") %>%
+fabF_Layout <- read_excel("Plate_Layout.xlsx", sheet = "fabF") %>%
   rename(sample = Well)
 
 ## Merging layout and summary
@@ -257,12 +257,12 @@ ggplot(percent_growth_fabF, aes(x = `Antibiotic Concentration`, y = percent_grow
         plot.title = element_text(face = "bold", hjust = 0.5),
         axis.text.x = element_text(angle = 55, hjust = 1))
 
-ggsave(filename = "./stats/240913_fabF_percent_growth.jpeg", 
+ggsave(filename = "./stats/R1_fabF_percent_growth.jpeg", 
        width = 297, height=210, units = 'mm')
 
 # Only three replicates so decent normality considering
 
-sink("./stats/240913_fabF.txt")
+sink("./stats/R1_fabF.txt")
 # Checking normality with Shapiro_Wilk
 print(percent_growth_fabF %>%
         group_by(Strain, `Antibiotic Concentration`) %>%  
@@ -271,10 +271,10 @@ sink()
 
 print(ggqqplot(percent_growth_fabF, "percent_growth", ggtheme = theme_bw()) +
         facet_grid(`Antibiotic Concentration` ~ Strain, labeller = "label_both"))
-ggsave(filename = "./stats/240913_fabF_qqplot.jpeg", 
+ggsave(filename = "./stats/R1_fabF_qqplot.jpeg", 
        , width = 297, height=210, units = 'mm')
 
-sink("./stats/240913_fabF_variance.txt")
+sink("./stats/R1_fabF_variance.txt")
 
 # Checking homogneity of variance with levene_test
 print(percent_growth_fabF %>% 
@@ -296,7 +296,7 @@ t_test <- percent_growth_fabF %>%
     p <= 0.0001 ~ "****"
   ))
 
-sink("./stats/240913_fabF_t_test.txt")
+sink("./stats/R1_fabF_t_test.txt")
 print(t_test)
 sink()
 
@@ -332,7 +332,7 @@ p = ggplot(percent_growth_fabF, aes(x = Strain, y = percent_growth)) +
 
 print(p)
 
-ggsave(gsub("%","_", paste0("./graphs/240913_fabF_stats.jpg")), width = 297, height = 210, units = "mm")
+ggsave(gsub("%","_", paste0("./graphs/R1_fabF_stats.jpg")), width = 297, height = 210, units = "mm")
 
 # summary stats
 
@@ -376,7 +376,7 @@ plot <- ggplot(summary_stats_data,
 
 print(plot)
 
-ggsave(filename = paste0("./graphs/240913_fabF_mean.svg"), 
+ggsave(filename = paste0("./graphs/R1_fabF_mean.svg"), 
        plot = plot, width = 297, height=210, units = 'mm')
 #### ---------------------------------------------------------------- #####
 #### fabF MIC Replicate 2 ####
@@ -387,7 +387,7 @@ ggsave(filename = paste0("./graphs/240913_fabF_mean.svg"),
 
 # Loading Data
 
-fabF_Data <- read_excel("250326_fabF_RIF_data.xlsx", sheet = "250326_R2")
+fabF_Data <- read_excel("fabF_RIF_data.xlsx", sheet = "R2")
 
 
 # Reformatting tables
@@ -397,7 +397,7 @@ long_fabF_Data <- reshape2::melt(fabF_Data, id.vars = "Hour")
 long_fabF_Data <- long_fabF_Data %>% rename(Well = variable)
 
 
-RIF_Layout <- read_excel("250326_Plate_Layout.xlsx", sheet = "fabF")
+RIF_Layout <- read_excel("Plate_Layout.xlsx", sheet = "fabF")
 
 
 fabF_Compiled_Data <- merge(long_fabF_Data, RIF_Layout, by = c("Well"))
@@ -416,7 +416,7 @@ p = ggplot(fabF_Compiled_Data, aes(x = Hour, y = value, color = Well)) +
 
 print(p)
 
-ggsave("./graphs/250326_fabF_overview.jpg", width = 297, 
+ggsave("./graphs/R2_fabF_overview.jpg", width = 297, 
        height = 210, units = "mm")
 
 # Remove antibiotic blank, C03, D02
@@ -455,7 +455,7 @@ p = ggplot(fabF_data, aes(x = Hour, y = normalised_value, color = Well)) +
 
 print(p)
 
-ggsave("./graphs/250326_fabF_cleaned_overview.jpg", width = 297, 
+ggsave("./graphs/R2_fabF_cleaned_overview.jpg", width = 297, 
        height = 210, units = "mm")
 
 
@@ -507,7 +507,7 @@ plot <- ggplot(stat_fabF_data,
 
 print(plot)
 
-ggsave(filename = paste0("./graphs/250326_RIF_fabF_MIC_growth_curves.jpg"), 
+ggsave(filename = paste0("./graphs/R2_RIF_fabF_MIC_growth_curves.jpg"), 
        plot = plot, width = 297, height=210, units = 'mm')
 
 
@@ -515,7 +515,7 @@ ggsave(filename = paste0("./graphs/250326_RIF_fabF_MIC_growth_curves.jpg"),
 
 #### Loading the Data ####
 
-fabF_Data <- read_excel("250326_fabF_RIF_data.xlsx", sheet = "250326_R2")
+fabF_Data <- read_excel("fabF_RIF_data.xlsx", sheet = "R2")
 
 ## Rename Hour column to Time
 
@@ -529,7 +529,7 @@ summ_fabF_Data <- SummarizeGrowthByPlate(fabF_Data, bg_correct = "min") %>%
 
 # Loading Plate Layout
 
-fabF_Layout <- read_excel("250326_Plate_Layout.xlsx", sheet = "fabF") %>%
+fabF_Layout <- read_excel("Plate_Layout.xlsx", sheet = "fabF") %>%
   rename(sample = Well)
 
 ## Merging layout and summary
@@ -619,12 +619,12 @@ ggplot(percent_growth_fabF, aes(x = `Antibiotic Concentration`, y = percent_grow
         plot.title = element_text(face = "bold", hjust = 0.5),
         axis.text.x = element_text(angle = 55, hjust = 1))
 
-ggsave(filename = "./stats/250326_fabF_percent_growth.jpeg", 
+ggsave(filename = "./stats/R2_fabF_percent_growth.jpeg", 
        width = 297, height=210, units = 'mm')
 
 # Only three replicates so decent normality considering
 
-sink("./stats/250326_fabF.txt")
+sink("./stats/R2_fabF.txt")
 # Checking normality with Shapiro_Wilk
 print(percent_growth_fabF %>%
         group_by(Strain, `Antibiotic Concentration`) %>%  
@@ -633,7 +633,7 @@ sink()
 
 print(ggqqplot(percent_growth_fabF, "percent_growth", ggtheme = theme_bw()) +
         facet_grid(`Antibiotic Concentration` ~ Strain, labeller = "label_both"))
-ggsave(filename = "./stats/250326_fabF_qqplot.jpeg", 
+ggsave(filename = "./stats/R2_fabF_qqplot.jpeg", 
        , width = 297, height=210, units = 'mm')
 
 sink("./stats/250326_fabF_variance.txt")
@@ -658,7 +658,7 @@ t_test <- percent_growth_fabF %>%
     p <= 0.0001 ~ "****"
   ))
 
-sink("./stats/250326_fabF_t_test.txt")
+sink("./stats/R2_fabF_t_test.txt")
 print(t_test)
 sink()
 
@@ -694,7 +694,7 @@ p = ggplot(percent_growth_fabF, aes(x = Strain, y = percent_growth)) +
 
 print(p)
 
-ggsave(gsub("%","_", paste0("./graphs/250326_fabF_stats.jpg")), width = 297, height = 210, units = "mm")
+ggsave(gsub("%","_", paste0("./graphs/R2_fabF_stats.jpg")), width = 297, height = 210, units = "mm")
 
 # summary stats
 
@@ -738,7 +738,7 @@ plot <- ggplot(summary_stats_data,
 
 print(plot)
 
-ggsave(filename = paste0("./graphs/250326_fabF_mean.svg"), 
+ggsave(filename = paste0("./graphs/R2_fabF_mean.svg"), 
        plot = plot, width = 297, height=210, units = 'mm')
 #### ---------------------------------------------------------------- #####
 #### Combined replicates ####
