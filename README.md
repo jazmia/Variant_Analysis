@@ -67,11 +67,17 @@ snippy --outdir sample_snps --ref reference_seq --R1 file1.trim.fq --R2 file2.tr
 Additional R scripts utilised to analyse growth curve data and flow cytometry data.
 
 ## Scripts ##
+**Mutation_Frequency_Analysis_Script**
+```
+R script to graph mutation frequency data. 
+data: Sequencing_freq_data.xlsx
+```
+
 **Growth_Curve_Analysis_Script**
 ```
 R script to analyse growth curve data including area under curve (AUC) analysis. 
-data: 250326_fabF_RIF_data.xlsx
-      250326_Plate_Layout.xlsx
+data: fabF_RIF_data.xlsx
+      Plate_Layout.xlsx
 ```
 
 **Flow_Cytometry_Analysis_Script**
