@@ -85,3 +85,10 @@ data: fabF_RIF_data.xlsx
 R script to analyse flow cytometry data including median fluorescence intensity difference (FID) analysis. 
 data: 
 ```
+
+## Additional Data ##
+**Rifampicin MIC**
+```
+Excel file containing OD600 data used to determine the MIC to rifampicin.
+data: RIF_MIC_Endpoint_OD600.xlsx
+```
