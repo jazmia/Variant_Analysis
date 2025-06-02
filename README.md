@@ -87,7 +87,7 @@ data:
 ```
 
 ## Additional Data ##
-**Rifampicin MIC**
+**Rifampicin_MIC**
 ```
 Excel file containing OD600 data used to determine the MIC to rifampicin.
 data: RIF_MIC_Endpoint_OD600.xlsx
