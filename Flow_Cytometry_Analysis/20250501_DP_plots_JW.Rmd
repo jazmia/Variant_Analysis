@@ -1,0 +1,341 @@
+---
+title: "Faceted plots"
+output: html_document
+date: "2025-05-01"
+---
+
+```{r setup, include=FALSE}
+library(multcomp)
+library(tidyverse)
+library(flowCore)
+library(here)
+library(flowViz)
+library(ggcyto)
+library(svglite)
+library(ggpmisc)
+library(scales)
+```
+
+# Importing
+
+```{r}
+flowdata <- here("Flowjo gated fcs") # path of folder with FCS files gated in FlowJo
+```
+
+
+```{r}
+fs <- read.flowSet(path = flowdata) # import with flowCore functions
+```
+
+
+```{r}
+sampleNames(fs)
+colnames(fs[[25]]) # checking parameters
+
+# Checking files 
+ggplot(fs, aes(x = `FJComp-B530-A`)) + 
+  geom_density() +
+  scale_x_log10() +
+  facet_wrap(~name)
+```
+
+# Metadata assignment
+
+```{r}
+pData(fs)$treatment <- ifelse(
+  grepl("Rif", sampleNames(fs), ignore.case = TRUE), "Rifampicin", "Untreated"
+) # adding treatment metadata to flowSet 
+pData(fs)$stain <- ifelse(
+  grepl("SYTOX", sampleNames(fs)), "SYTOX Green", "Unstained"
+) # adding stained or not stained
+pData(fs)$strain <- ifelse(
+  grepl("fabF", sampleNames(fs), ignore.case = TRUE), "∆fabF", "Wild-type"
+) # adding strain information
+pData(fs)$growth_phase <- ifelse(
+  grepl("exp", sampleNames(fs), ignore.case = TRUE), "Exponential", "Stationary"
+) # adding strain information
+pData(fs[1])
+```
+
+
+# Density plots
+
+```{r}
+df_dead <- as.data.frame(exprs(fs[[1]]))  # splitting out to add to all facets
+df_dead$source <- "Dead"
+```
+
+# Density plots
+
+## All facets with dead cells overlaid
+```{r}
+ p1 <- ggplot(fs[2:25], aes(x = `FJComp-B530-A`, fill = strain)) + # removing dead cells dataframe, otherwise added to 1 facet.
+  geom_density(alpha = 0.4) +
+  geom_density(data = df_dead, aes(x = `FJComp-B530-A`), # plotting dead cells in all facets
+               fill = "#00BA38",
+               alpha = 0.4,
+               inherit.aes = FALSE) +
+  scale_fill_manual(values =c("#F8766D", "#619CFF")) + # nicer colours
+  facet_grid(growth_phase~treatment, scales = "free") + 
+  scale_x_log10(breaks = c(10, 100, 1000, 10000, 100000),
+                labels = trans_format("log10", math_format(10^.x))) + # adjust scaling here
+  coord_cartesian(xlim = c(10, 170000)) + # adjust area plotted
+  labs(
+    x      = "SYTOX Green fluorescence",
+    y      = "Density",
+    colour = "Growth phase"
+    ) +
+  theme_bw() +
+  theme_bw(base_size = 18)
+```
+
+## All facets
+
+```{r}
+ p2 <- ggplot(fs[2:25], aes(x = `FJComp-B530-A`, fill = strain)) + # removing dead cells dataframe, otherwise added to 1 facet.
+  geom_density(alpha = 0.4) +
+  facet_grid(growth_phase~treatment, scales = "free") + 
+  scale_x_log10(breaks = c(10, 100, 1000, 10000, 100000),
+                labels = trans_format("log10", math_format(10^.x))) + # adjust scaling here
+  coord_cartesian(xlim = c(10, 170000)) + # adjust area plotted
+  labs(
+    x      = "SYTOX Green fluorescence",
+    y      = "Density",
+    colour = "Growth phase"
+    ) +
+  theme_bw(base_size = 18) +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    legend.position = "bottom"
+    )
+```
+
+
+```{r}
+fs_stn <- fs[pData(fs)$growth_phase == "Stationary"] # subsetting stationary phase
+sampleNames(fs_stn)
+```
+
+## Stationary with dead cells overlaid
+```{r}
+ p3 <- ggplot(fs_stn[2:13], aes(x = `FJComp-B530-A`, fill = strain)) + # removing dead cells dataframe, otherwise added to 1 facet.
+  geom_density(alpha = 0.4) +
+  scale_fill_manual(values =c("#F8766D", "#619CFF")) + # nicer colours
+  facet_grid(growth_phase~treatment, scales = "free") + 
+  scale_x_log10(breaks = c(10, 100, 1000, 10000, 100000),
+                labels = trans_format("log10", math_format(10^.x))) + # adjust scaling here
+  coord_cartesian(xlim = c(10, 170000)) + # adjust area plotted
+  labs(
+    x      = "SYTOX Green fluorescence",
+    y      = "Density",
+    colour = "Growth phase"
+    ) +
+    theme_bw(base_size = 18) +
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    legend.position = "bottom")
+  
+```
+
+```{r}
+fs_stn_t <- fs[pData(fs)$growth_phase == "Stationary" & pData(fs)$treatment == "Rifampicin"] # subsetting stationary phase
+sampleNames(fs_stn_t)
+```
+
+
+## Stationary phase
+```{r}
+ p4 <- ggplot(fs_stn_t, aes(x = `FJComp-B530-A`, fill = strain)) + # removing dead cells dataframe, otherwise added to 1 facet.
+  geom_density(alpha = 0.4) +
+    geom_density(data = df_dead, aes(x = `FJComp-B530-A`), # plotting dead cells in all facets
+               fill = "#00BA38",
+               alpha = 0.4,
+               inherit.aes = FALSE) +
+  facet_grid(growth_phase~treatment) +
+  scale_x_log10(breaks = c(10, 100, 1000, 10000, 100000),
+                labels = trans_format("log10", math_format(10^.x))) + # adjust scaling here
+  coord_cartesian(xlim = c(10, 170000)) + # adjust area plotted
+  labs(
+    x      = "SYTOX Green fluorescence",
+    y      = "Density",
+    colour = "Growth phase"
+    ) +
+  theme_bw(base_size = 14) +
+   theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    legend.position = "bottom")
+  
+```
+
+
+```{r}
+ p5 <- ggplot(fs_stn_t, aes(x = `FJComp-B530-A`, fill = strain)) + # removing dead cells dataframe, otherwise added to 1 facet.
+  geom_density(alpha = 0.4) +
+    geom_density(data = df_dead, aes(x = `FJComp-B530-A`), # plotting dead cells in all facets
+               fill = "#00BA38",
+               alpha = 0.4,
+               inherit.aes = FALSE) +
+  facet_grid(growth_phase~treatment) +
+  scale_x_log10(breaks = c(10, 100, 1000, 10000, 100000),
+                labels = trans_format("log10", math_format(10^.x))) + # adjust scaling here
+  coord_cartesian(xlim = c(10, 170000)) + # adjust area plotted
+  labs(
+    x      = "SYTOX Green fluorescence",
+    y      = "Density",
+    colour = "Growth phase"
+    ) +
+  theme_bw(base_size = 14)
+```
+
+```{r}
+ p6 <- ggplot(fs_stn[2:13], aes(x = `FJComp-B530-A`, fill = strain)) + # removing dead cells dataframe, otherwise added to 1 facet.
+  geom_density(alpha = 0.4) +
+  geom_density(data = df_dead, aes(x = `FJComp-B530-A`), # plotting dead cells in all facets
+               fill = "#00BA38",
+               alpha = 0.4,
+               inherit.aes = FALSE) +
+  scale_fill_manual(values =c("#F8766D", "#619CFF")) + # nicer colours
+  facet_grid(growth_phase~treatment, scales = "free") + 
+  scale_x_log10(breaks = c(10, 100, 1000, 10000, 100000),
+                labels = trans_format("log10", math_format(10^.x))) + # adjust scaling here
+  coord_cartesian(xlim = c(10, 170000)) + # adjust area plotted
+  labs(
+    x      = "SYTOX Green fluorescence",
+    y      = "Density",
+    colour = "Growth phase"
+    ) +
+  theme_bw(base_size = 14)
+```
+
+
+
+# Linear eqn plots
+
+```{r}
+channels <- c("FJComp-B530-A", "FSC-A", "SSC-A")
+medians <- fsApply(fs, function(fr) { # calculating medians for the specified parameters/channels
+  apply(exprs(fr)[, channels], 2, median, na.rm = TRUE)
+}) |> 
+  as.data.frame()
+medians$name <- rownames(medians)
+
+metadata <- as.data.frame(pData(fs)) # extracting metadata as dataframe
+metadata$name <- rownames(metadata) # names column missing, so assigning the correct rownames to column "names".
+medians <- left_join(metadata, medians, by = "name")
+mediansp <- medians[-1,] # removing dead cell row
+```
+
+
+```{r}
+p7 <- ggplot(mediansp, aes(x = `FJComp-B530-A`, y = `FSC-A`)) +
+  geom_point(aes(colour = growth_phase)) + 
+  scale_x_log10(
+    breaks = c(10, 100, 1000, 10000, 100000),
+    labels = trans_format("log10", math_format(10^.x)),
+    limits = c(10, 1e5)) +
+  facet_grid(strain ~ treatment) + 
+  geom_smooth(method = "lm", formula = y ~ log(x, 10), se = TRUE, # log transformed x
+              color = "black", linewidth = 0.4, linetype = "dashed") + 
+   labs(
+    x      = bquote("SYTOX Green fluorescence"),
+    y      = "Forward scatter",
+    colour = "Growth phase"
+  ) +
+    stat_poly_eq(
+    use_label("R2"), # Adding r-squared onto plot
+    formula = y ~ x, 
+    method = "lm",
+    parse = TRUE,
+    size = 3,
+    label.y = 0.95, # position of r-squared on plot
+    label.x = 0.95
+  ) +
+  theme_bw(base_size = 14)
+```
+
+
+# Statistics
+
+Need to run this if you want to check the statistics. Getting data in separate dataframes for the comparisons.
+
+```{r}
+dfstats <- mediansp |> 
+  mutate(
+   group = case_when(
+      treatment == "Untreated" & stain == "SYTOX Green" & strain == "Wild-type" & growth_phase == "Stationary" ~ "stn_unt_ctrl1",
+      treatment == "Untreated" & stain == "SYTOX Green" & strain == "∆fabF" & growth_phase == "Stationary" ~ "stn_unt_∆fabF",
+      treatment == "Rifampicin" & stain == "SYTOX Green" & strain == "Wild-type" & growth_phase == "Stationary" ~ "stn_rif_ctrl1",
+      treatment == "Rifampicin" & stain == "SYTOX Green" & strain == "∆fabF" & growth_phase == "Stationary" ~ "stn_rif_∆fabF", 
+      
+      treatment == "Untreated" & stain == "SYTOX Green" & strain == "Wild-type" & growth_phase == "Exponential" ~ "exp_unt_ctrl1",
+      treatment == "Untreated" & stain == "SYTOX Green" & strain == "∆fabF" & growth_phase == "Exponential" ~ "exp_unt_∆fabF",
+      treatment == "Rifampicin" & stain == "SYTOX Green" & strain == "Wild-type" & growth_phase == "Exponential" ~ "exp_rif_ctrl1",
+      treatment == "Rifampicin" & stain == "SYTOX Green" & strain == "∆fabF" & growth_phase == "Exponential" ~ "exp_rif_∆fabF", 
+      TRUE ~ "CHECK"
+  )
+  )
+
+exp_nt <- dfstats[grepl("exp", dfstats$group) & !grepl("rif", dfstats$group), "group"]
+exp_rif <- dfstats[grepl("exp", dfstats$group) & grepl("rif", dfstats$group), "group"]
+stn_nt <- dfstats[grepl("stn", dfstats$group) & !grepl("rif", dfstats$group), "group"]
+stn_rif <- dfstats[grepl("stn", dfstats$group) & grepl("rif", dfstats$group), "group"]
+
+
+df_unt_exp <- subset(
+  dfstats,
+  group %in% exp_nt)
+df_t_exp <- subset(
+  dfstats,
+  group %in% exp_rif)
+df_unt_stn <- subset(
+  dfstats,
+  group %in% stn_nt)
+df_t_stn <- subset(
+  dfstats,
+  group %in% stn_rif)
+```
+
+Running t-test's
+
+```{r}
+ttest_results <- map(
+  list(df_unt_stn, df_t_stn, df_unt_exp, df_t_exp),
+  ~ t.test(`FJComp-B530-A` ~ group, data = .x, alternative = "two.sided")
+)
+
+# Extract p-values
+raw_pvals <- map_dbl(ttest_results, ~ .x$p.value)
+
+# Apply multiple comparisons correction
+p.adjust(raw_pvals, method = "bonferroni")  # Or "bonferroni", "BH" 
+```
+
+
+# Saving plots
+
+
+```{r}
+
+savepath <- here("plots")
+height <- 127
+width <- 180
+unit <- "mm"
+plot <- p4
+plotname <- "dead.png"
+
+ggsave(file = paste0(Sys.Date(), "_", plotname), 
+       plot = plot,
+       path = savepath,
+       height = height,
+       width = width,
+       units = unit)
+```
+
+
+
+
+
+
