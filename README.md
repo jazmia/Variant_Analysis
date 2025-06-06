@@ -84,7 +84,7 @@ data: fabF_RIF_data.xlsx
 ```
 R markdown file to analyse flow cytometry data including median fluorescence intensity difference (FID) analysis. 
 data: flow_cytometry_p-values.docx
-      fcs data available upon request
+      contact corresponding author for fcs data
 ```
 
 ## Additional Data ##
