@@ -31,7 +31,7 @@ bwa mem reference_seq sample_seq.fq > aligned_seq.sam
 samtools view -S -b aligned_seq.sam > aligned_seq.bam
 samtools sort -o aligned_sorted_seq.bam aligned_seq.bam
 samtools flagstat aligned_sorted_seq.bam
-bcftools mpileup -O b -o sample_seq.bcf reference_seq akigned_sorted_seq.am
+bcftools mpileup -O b -o sample_seq.bcf reference_seq aligned_sorted_seq.am
 bcftools call --ploidy 1 -m -v -o sample_varaints.vcf sample_seq.bcf
 vcfutils.pl varFilter sample_variants.vcf > sample_final_variants.vcf
 less -S sample_final_variants.vcf
